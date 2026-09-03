@@ -14,8 +14,8 @@ os.makedirs(staging_dir, exist_ok=True)
 
 # Scenario 1: Dynamic File Discovery & Real-World Metadata Harvesting
 all_files = glob.glob(os.path.join(input_dir, "nse_feed_*.txt"))
-print(f"🚀 [LAUNCH] Executing Deep-Dive Core Engine...")
-print(f"📊 [SCENARIO 1] Discovered {len(all_files)} raw data files to process.\n")
+print(f" [LAUNCH] Executing Deep-Dive Core Engine...")
+print(f" [SCENARIO 1] Discovered {len(all_files)} raw data files to process.\n")
 
 for file_path in all_files:
     file_name = os.path.basename(file_path)
@@ -39,7 +39,7 @@ for file_path in all_files:
     if not corrupt_rows.empty:
         quarantine_file_path = os.path.join(quarantine_dir, f"quarantine_{file_name}")
         corrupt_rows.to_csv(quarantine_file_path, sep=",", index=False)
-        print(f"   ⚠️ [SCENARIO 2] Corrupt rows routed to: {quarantine_file_path}")
+        print(f"    [SCENARIO 2] Corrupt rows routed to: {quarantine_file_path}")
 
     # Scenario 3: Mid-Flight Business Logic Enrichment
     if not clean_rows.empty:
@@ -52,13 +52,13 @@ for file_path in all_files:
         clean_rows['price_performance_tier'] = clean_rows['close_price'].apply(
             lambda price: "High Value" if price > 2000 else "Standard Value"
         )
-        print(f"   ✅ [SCENARIO 3] Mid-flight data enrichment complete.")
+        print(f"    [SCENARIO 3] Mid-flight data enrichment complete.")
         
         # Scenario 4: High-Performance Warehouse Staging (Snappy Parquet)
         output_parquet_path = os.path.join(staging_dir, f"staged_{base_name}.parquet")
         clean_rows.to_parquet(output_parquet_path, compression="snappy", index=False)
-        print(f"   🎯 [SCENARIO 4] Compressed Snappy Parquet file created at: {output_parquet_path}")
+        print(f"    [SCENARIO 4] Compressed Snappy Parquet file created at: {output_parquet_path}")
     
     print("-" * 75)
 
-print("\n⚙️ [SUCCESS] Deep-Dive Pipeline execution complete. All stages verified.")
+print("\n [SUCCESS] Deep-Dive Pipeline execution complete. All stages verified.")
