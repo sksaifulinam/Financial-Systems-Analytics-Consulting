@@ -1,5 +1,5 @@
 # National Stock Exchange (NSE) Market Data Ingestion Engine
- **Project Documentation:** [Main Overview](./ARCHITECTURAL_DEEP_DIVE.md) |  [Architectural Deep-Dive & Local Engine](./ARCHITECTURAL_DEEP_DIVE.md)
+ **Project Documentation:** [Main Overview](./README.md) |  [Architectural Deep-Dive & Local Engine](./ARCHITECTURAL_DEEP_DIVE.md)
 
 
 ## Project Overview
