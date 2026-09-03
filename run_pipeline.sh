@@ -10,7 +10,7 @@ QUARANTINE_DIR="./data/quarantine"
 STAGING_DIR="./data/staging"
 
 echo "======================================================================"
-echo "🏁 [SH-WRAPPER] Starting Master End-to-End Orchestration Flow..."
+echo " [SH-WRAPPER] Starting Master End-to-End Orchestration Flow..."
 echo "======================================================================"
 
 # Step 1: Verify Directory Foundations
