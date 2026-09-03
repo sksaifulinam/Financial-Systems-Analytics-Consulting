@@ -1,0 +1,37 @@
+Bypassing On-Prem to Cloud Bottlenecks
+
+In my recent master portfolio piece, the NSE-MarketData-Ingestion-Engine, 
+I designed a resilient, end-to-end data ingestion framework that directly maps
+traditional enterprise ETL principles onto a modern, cloud-native stack.
+
+The problem I was solving involved raw, high-velocity daily market data feeds 
+arriving with severe formatting anomalies, 
+shifted delimiters, missing identifiers, and mixed data types in numeric columns. 
+In my past roles at firms like AT&T, we would handle this via 
+Informatica PowerCenter sessions and complex Teradata staging tables. 
+For this engine, I built a zero-error-boundary Python framework.
+
+I structured the pipeline into four core production phases:
+
+Automated Metadata Harvesting: Dynamically discovering wild-card file patterns 
+and mapping schema drifts on the fly.
+
+Data Quality Isolation Layer: Instead of letting the pipeline crash due to string characters in price columns, 
+I implemented defensive type-coercion logic using Pandas data frame structures. 
+This cleanly isolates corrupt or null records into a designated Quarantine folder, 
+matching enterprise data lineage standards.
+
+Mid-Flight Business Logic Enrichment: 
+Injecting dynamic load timestamps to preserve tracking history and computing performance tiers mid-flight.
+
+High-Performance Warehouse Staging: To save on cloud analytics compute costs, 
+the clean data frames are written into Snappy-compressed Apache Parquet format, 
+optimized for direct target loading into a warehouse like AWS Redshift or PostgreSQL.
+
+What I’m most proud of in this project is structural adaptability. 
+When testing against severe environment constraints, I didn't lose engineering momentum. 
+I wrapped the python components into an automated Unix Shell Orchestration script (run_pipeline.sh) 
+to audit the entire directory lineage upon completion. This proves that whether a system is running on a container, 
+a local machine, or fully serverless inside an AWS Glue node, 
+the core data integration logic remains 100% resilient and production-ready.
+
