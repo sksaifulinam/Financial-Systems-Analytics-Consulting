@@ -1,4 +1,6 @@
 # National Stock Exchange (NSE) Market Data Ingestion Engine
+ **Project Documentation:** [Main Overview](./README.md) |  [Architectural Deep-Dive & Local Engine](./ARCHITECTURAL_DEEP_DIVE.md)
+
 
 ## Project Overview
 An enterprise-grade cloud data engineering pipeline designed to ingest, clean, and model high-volume relational market datasets from legacy flat-file repositories into an optimized AWS cloud analytics lake. This architecture implements a robust schema-agnostic extraction tier, automated metadata harvesting, mid-flight data validation filters, and a high-performance analytics repository.
