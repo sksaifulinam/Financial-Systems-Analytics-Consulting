@@ -1,5 +1,5 @@
 # NSE Market Data Ingestion Engine: Deep-Dive Blueprint
- **Project Documentation:** [Main Overview](./README.md) |  [Architectural Deep-Dive & Local Engine](./ARCHITECTURAL_DEEP_DIVE.md)
+ **Project Documentation:** [Main Overview](./README.md) |  [Architectural Deep-Dive & Local Engine](./README.md)
 
 
 This document serves as our deep-dive technical blueprint. It outlines the resilient engineering patterns used to process raw market data feeds with zero error boundaries.
