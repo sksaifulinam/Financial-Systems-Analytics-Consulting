@@ -1,50 +1,58 @@
 # NSE Market Data Ingestion Engine: Deep-Dive Blueprint
 
- **Project Documentation:** [Main Overview](./README.md) |  [Architectural Deep-Dive & Local Engine](./ARCHITECTURAL_DEEP_DIVE.md)
+📂 **Project Documentation:** [Main Overview](./README.md) | 🔬 [Architectural Deep-Dive & Local Engine](./ARCHITECTURAL_DEEP_DIVE.md)
 
-This document outlines the resilient production engineering patterns used to build a complete end-to-end market data ingestion lifecycle with zero error boundaries.
+This document maps out the production-grade data engineering patterns used to process daily National Stock Exchange (NSE) End-of-Day (EOD) Bhavcopy market feeds with absolute zero-error boundaries.
 
 ---
 
-##  The 4 Master Project Scenarios Covered
+## 🏗️ Production Architecture & Data Flow Map
+
+```text
+[1. SOURCE LAYER]         -->  [2. ORCHESTRATION LAYER]   -->  [3. CORE PROCESSING TIER]
+Daily EOD Bhavcopy Feeds       run_pipeline.sh                 nse_deep_dive_engine.py
+Raw Flat Files (.txt/.csv)     (Unix Bash Wrapper Engine)      (Python 3 / Pandas DataFrames)
+                                                                             |
+                                     +---------------------------------------+
+                                     | (Defensive Type Coercion Validation Check)
+                                     |
+                                     +---> [IF NULL / CORRUPT DATA] ---> [4. QUARANTINE VAULT]
+                                     |                                   data/quarantine/quarantine_*.txt
+                                     |
+                                     +---> [IF CLEAN DATA METRIC]   ---> [5. HIGH-PERFORMANCE STAGING]
+                                                                         data/staging/staged_*.parquet
+                                                                         (Snappy Columnar Compression)
+                                                                                     |
+                                                                                     v
+                                                                        [6. TARGET WAREHOUSE LAYER]
+                                                                         AWS Redshift Fact Tables
+                                                                         (warehouse_ddl_mapping.sql)
+```
+
+---
+
+## 🔬 The 4 Master Project Scenarios Covered
 
 ### 1. Scenario 1: Automated Metadata Harvesting
-- Automatically discovers dynamic incoming daily text files (`data/input/nse_feed_*.txt`).
-- Dynamically extracts internal schemas (`['ticker_symbol', 'trade_date', 'close_price', 'account_status']`) mid-flight.
+- **Operation:** Dynamically discovers daily incoming text file targets (`data/input/nse_feed_*.txt`) matching exchange patterns.
+- **Output:** Extracts and harvests structural field layouts (`['ticker_symbol', 'trade_date', 'close_price', 'account_status']`) mid-flight without relying on fixed index assumptions.
 
-### 2. Scenario 2: Data Quality Isolation Layer
-- Enforces strict type-coercion validation to gracefully catch unexpected text string data inside numeric fields.
-- Routes corrupt records instantly to an isolated `data/quarantine/` directory to prevent pipeline crashes.
+### 2. Scenario 2: Data Quality Isolation Layer (The Quarantine Path)
+- **Operation:** Enforces strict type-coercion using `pd.to_numeric(errors='coerce')` to catch unexpected text strings in numeric fields.
+- **Output:** Automatically strips out rows with missing ticker names or invalid closing prices (`<= 0`). Routes them instantly to an isolated `data/quarantine/` reject vault to protect downstream database integrity.
 
 ### 3. Scenario 3: Mid-Flight Business Logic Enrichment
-- Dynamically injects an `ingestion_timestamp` metric to track the exact load time automatically.
-- Applies automated clean record metadata flags (`clean_record_flag = Y`).
-- Computes custom business metrics on the fly (e.g., categorizing records into `High Value` or `Standard Value`).
+- **Operation:** Dynamically injects an `ingestion_timestamp` metric to track the exact runtime execution lineage.
+- **Output:** Appends automated audit validation quality flags (`clean_record_flag = Y`) and runs a performance tier category rule (`close_price > 2000` ? `"High Value"` : `"Standard Value"`).
 
 ### 4. Scenario 4: High-Performance Warehouse Staging
-- Converts processed datasets directly into optimized Apache Parquet format.
-- Applies Snappy compression metrics to minimize analytics warehouse compute and storage overhead in `data/staging/`.
+- **Operation:** Converts clean, validated records into high-performance Apache Parquet format.
+- **Output:** Applies Snappy columnar compression engines to minimize data warehouse compute costs and optimize historical query execution speeds.
 
 ---
 
-##  Complete End-to-End Component Directory
+## 🛠️ Complete Structural Architecture Index
 
-The master framework is structured into a professional, modular three-tier layout:
-
-### 1. The Orchestration Layer (`run_pipeline.sh`)
-- A production-grade Bash shell wrapper that automates the workspace setup.
-- Checks data directory health, executes the core processing logic, and prints a full data lineage audit log upon completion.
-
-### 2. The Processing Engine (`nse_deep_dive_engine.py`)
-- The core Python data processing script that executes all schema extractions, type coercions, data quality filters, and Snappy Parquet generation routines.
-
-### 3. The Target Data Warehouse Layer (`warehouse_ddl_mapping.sql`)
-- The analytics staging layer designed for cloud environments like AWS Redshift or enterprise PostgreSQL.
-- Implements a production table (`nse_market_data_fact`) and an optimized reporting view (`vw_high_value_tickers`) for business intelligence tooling.
-
----
-
-##  Storage Architecture Blueprint
-- **`data/input/`** : Ingest entry point for daily text data feeds.
-- **`data/quarantine/`** : Isolation vault for corrupted row metrics.
-- **`data/staging/`** : High-performance warehouse staging target for compressed Parquet outputs.
+- **Orchestration Layer (`run_pipeline.sh`):** A Unix Bash script that audits directory structures, executes the core python pipeline payload, monitors exit status codes (`$?`), and prints terminal logging summaries.
+- **Processing Core (`nse_deep_dive_engine.py`):** The computational engine using Python 3 and Pandas dataframes to execute type conversions, logic splits, and Parquet serialization.
+- **Target Storage Layer (`warehouse_ddl_mapping.sql`):** The analytics relational warehouse schema mapping defining production fact tables (`nse_market_data_fact`) and operational views for reporting utilities.
