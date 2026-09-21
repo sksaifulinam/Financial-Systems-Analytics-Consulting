@@ -1,37 +1,36 @@
-===================================================================================================
-FOLDER REPOSITORY : Global-Banking-Fraud-Isolation-Engine
-FILE NAME         : README.md
-AUTHOR            : Sk Saiful Inam (Senior Data Lead)
-DESCRIPTION       : Enterprise Cloud Data Pipeline for Ingestion, Deduplication, and Fraud Isolation
-===================================================================================================
+>  **ENTERPRISE CORE ARTIFACT SPECS**
+> * **FOLDER REPOSITORY:** `Global-Banking-Fraud-Isolation-Engine`
+> * **FILE DEPLOYMENT:** `README.md`
+> * **AUTHOR DATA LEAD:** **Sk Saiful Inam (Senior Data Lead)**
+> * **CORE RUNTIME TARGET:** Enterprise Cloud Data Pipeline for Ingestion, Deduplication, and Fraud Isolation
 
 # Global Banking Fraud Isolation Engine
-
-**Project Documentation:** Main Overview | [🔬 Architectural Deep-Dive & Core Logic](ARCHITECTURAL_DEEP_DIVE.md)
 
 ## Project Overview
 An enterprise-grade cloud migration data pipeline designed to ingest, clean, deduplicate, and model high-volume transactional banking data streams from legacy on-premise systems into an optimized AWS analytical data warehouse. This engine serves as a secure validation barrier, automatically trapping, scoring, and routing anomalous or fraudulent transaction rows into a quarantine layer mid-flight.
 
-## Production Architecture & Data Flow Map
+##  Production Architecture & Data Flow Map
 
-[ Legacy Core Bank Database ]
+```text
+[  Legacy Core Bank Database ]
         │ (Teradata On-Prem Ledger Dumps)
         ▼
-[ AWS S3 Landing Zone ] ──────► daily_ledger.csv (Raw Input Tier)
+[  AWS S3 Landing Zone ] ──────► daily_ledger.csv (Raw Input Tier)
                                         │
                                         ▼  (Spark Ingestion Lookup)
-                                 [ AWS Glue / PySpark Compute Engine ]
+                                 [ ⚙️ AWS Glue / PySpark Compute Engine ]
                                         │
         ┌───────────────────────────────┴───────────────────────────────┐
         ▼ (If Dynamic Fraud Score > 0.90 OR Account Number IS NULL)      ▼ (If Record Is Verified Clean & Unique)
-[ S3 Quarantine Zone ]                                        [ S3 Silver Zone Staging Vault ]
+[  S3 Quarantine Zone ]                                        [  S3 Silver Zone Staging Vault ]
   quarantine_zone/flagged_data.csv                                silver_zone/clean_data.csv
   (Isolated for Compliance Audit)                                 (Stored in Columns For Analytics)
                                                                         │
                                                                         ▼ (COPY Parallel Bulk Load)
-                                                                 [ Target Data Warehouse ]
+                                                                 [  Target Data Warehouse ]
                                                                    Amazon Redshift Fact Tables
                                                                    (Distribution/Sort Key Optimized)
+```
 
 ## Core Architectural Scenarios Covered
 1. **Automated High-Watermark CDC:** Programmatically queries the target reporting warehouse table to calculate the maximum transaction date in memory, using it as a dynamic variable to extract only fresh incremental delta rows from the storage lakes.
