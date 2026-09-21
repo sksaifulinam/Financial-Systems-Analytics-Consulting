@@ -1,0 +1,49 @@
+/* ================================================================ 
+   FILE NAME   : legacy_banking_dedup.bteq 
+   AUTHOR      : Sk Saiful Inam (Senior Data Lead) 
+   DESCRIPTION : Legacy Teradata batch pipeline extracting daily transaction Deltas 
+   ================================================================ 
+*/ 
+ 
+.LOGON td_prod_server/sksaiful,password123; 
+ -- TRAP 1: Volatile Table tied strictly to this active session 
+context 
+CREATE VOLATILE TABLE vt_daily_transactions AS ( 
+    SELECT  
+        transaction_id, 
+        account_number, 
+        transaction_date, 
+        transaction_amount, 
+        fraud_risk_score, 
+        last_updated 
+    FROM bank_retail_prod.transaction_ledger 
+    WHERE transaction_date = CURRENT_DATE 
+) WITH DATA PRIMARY INDEX (account_number) ON COMMIT PRESERVE ROWS; 
+ -- TRAP 2: Heavy Row-Number Window Function executing across 
+constrained AMP disks 
+CREATE VOLATILE TABLE vt_deduplicated_records AS ( 
+    SELECT  
+        transaction_id, 
+        account_number, 
+        transaction_date, 
+        transaction_amount, 
+        fraud_risk_score, 
+        ROW_NUMBER() OVER (PARTITION BY transaction_id ORDER BY 
+last_updated DESC) as row_num 
+    FROM vt_daily_transactions 
+) WITH DATA PRIMARY INDEX (account_number) ON COMMIT PRESERVE ROWS; 
+ 
+  
+ 
+-- FINAL TARGET INSERT: Fails if session blinks or drops the 
+Volatile memory layers 
+INSERT INTO bank_warehouse_prod.fact_banking_transactions 
+SELECT  
+transaction_id, 
+account_number, 
+transaction_date, 
+transaction_amount, 
+fraud_risk_score 
+FROM vt_deduplicated_records 
+WHERE row_num = 1; 
+.LOGOFF;
