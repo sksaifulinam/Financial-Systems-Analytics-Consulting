@@ -11,14 +11,15 @@ An enterprise-grade cloud migration data pipeline designed to ingest, clean, ded
 
 ##  Production Architecture & Data Flow Map
 
+
 ```text
 [  Legacy Core Bank Database ]
-        │ (Teradata On-Prem Ledger Dumps)
+        │ (Teradata On-Prem BTEQ Run: legacy_banking_dedup.bteq)
         ▼
-[  AWS S3 Landing Zone ] ──────► daily_ledger.csv (Raw Input Tier)
+[  AWS S3 Landing Zone ] ──────► daily_ledger.csv (Created via: generate_test_data.py)
                                         │
-                                        ▼  (Spark Ingestion Lookup)
-                                 [ ⚙️ AWS Glue / PySpark Compute Engine ]
+                                        ▼  (Spark Ingestion Lookup: pipeline_validation_engine.py)
+                                 [  AWS Glue / PySpark Compute Engine: banking_fraud_cdc_job.py ]
                                         │
         ┌───────────────────────────────┴───────────────────────────────┐
         ▼ (If Dynamic Fraud Score > 0.90 OR Account Number IS NULL)      ▼ (If Record Is Verified Clean & Unique)
@@ -29,8 +30,8 @@ An enterprise-grade cloud migration data pipeline designed to ingest, clean, ded
                                                                         ▼ (COPY Parallel Bulk Load)
                                                                  [  Target Data Warehouse ]
                                                                    Amazon Redshift Fact Tables
-                                                                   (Distribution/Sort Key Optimized)
 ```
+
 
 ## Core Architectural Scenarios Covered
 1. **Automated High-Watermark CDC:** Programmatically queries the target reporting warehouse table to calculate the maximum transaction date in memory, using it as a dynamic variable to extract only fresh incremental delta rows from the storage lakes.
