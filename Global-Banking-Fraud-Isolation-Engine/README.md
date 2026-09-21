@@ -44,3 +44,5 @@ An enterprise-grade cloud migration data pipeline designed to ingest, clean, ded
 * **Compute Processing Core:** AWS Glue Serverless Framework, Apache Spark (PySpark Engine API)
 * **Data Lakehouse Modeling:** Columnar Architecture, Dimensional Star Schemas, Automated Watermarking
 * **Language & Analysis Tools:** Advanced Analytical SQL, Python Data Engineering Libraries (Pandas/PySpark)
+* **Verification Testing:** Direct Cloud Audit validation scripts via Amazon Athena (`athena_audit_query.sql`)
+
